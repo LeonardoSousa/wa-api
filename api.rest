@@ -1,0 +1,16 @@
+###
+GET http://localhost:8080/messages/558781213366@s.whatsapp.net
+
+###
+GET http://localhost:8080/status
+
+###
+POST http://localhost:8080/send-message
+Content-Type: application/json
+
+{
+    "number": "558781204523@s.whatsapp.net",
+    "message": {
+        "text": "TESTE"
+    }
+}
