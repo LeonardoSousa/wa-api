@@ -1,5 +1,6 @@
 import makeWASocket, {
   Browsers,
+  ConnectionState,
   MessageUpsertType,
   WASocket,
   makeInMemoryStore,
@@ -7,20 +8,17 @@ import makeWASocket, {
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
 import pino from "pino";
+import { makeMysqlStore } from "./utils/make-mysql-store";
+import { connection } from "./utils/database";
 
 export class Client {
   #sock: WASocket;
-  #store: ReturnType<typeof makeInMemoryStore>;
+  #store: ReturnType<typeof makeMysqlStore>;
   #prefix: string = "";
 
   constructor(prefix: string) {
     this.#prefix = prefix;
-    this.#store = makeInMemoryStore({});
-    // this.#store.readFromFile(this.getStoreFileName());
-
-    // setInterval(() => {
-    //   this.#store.writeToFile(this.getStoreFileName());
-    // }, 1000);
+   
   }
 
   async connect() {
@@ -36,30 +34,37 @@ export class Client {
       auth: state,
       printQRInTerminal: true,
       logger,
-      browser: Browsers.macOS('Desktop')
+      browser: Browsers.macOS("Desktop"),
     });
 
-    this.#sock.ev.on("connection.update", (update) => {
-      if (update.lastDisconnect?.error?.message.startsWith("Stream Errored")) {
-        this.connect();
+    this.#store = makeMysqlStore(connection);
+    this.#store.readFromFile(this.getStoreFileName());
+   
+    this.#store.bind(this.#sock.ev)
+
+    this.#sock.ev.on("connection.update", async state => {
+      if (state.lastDisconnect?.error?.message.startsWith("Stream Errored")) {
+        console.log('error connect')
+        await this.connect();
       }
-      if (update.connection == "open") {
-        console.log("conectado...");
-        this.#store.bind(this.#sock.ev);
-      }
-      if(update.connection == "close") {
-        console.log("desconectado")
-      }
-    });
+      this.onConnectionUpdate(state)
+    } 
+    );
 
     this.#sock.ev.on("creds.update", saveCreds);
 
     this.#sock.ev.on("messages.upsert", this.onUpsertMessage);
 
-    this.#sock.ev.on("messaging-history.set", function(data) {
-      console.log('set messages', data.messages.length)
-    })
-    
+  }
+
+  async onConnectionUpdate(state: Partial<ConnectionState>) {
+       
+    if (state.connection == "open") {
+      console.log("conectado...");
+    }
+    if (state.connection == "close") {
+      console.log("desconectado");
+    }
   }
 
   onUpsertMessage(message: {
@@ -83,21 +88,11 @@ export class Client {
   }
 
   async fetchMessages(jid: string) {
-
-    const recent = await this.#store.mostRecentMessage(jid);
-
-    if (recent) {
-      return await this.#store.loadMessages(jid, 10, {
-        before: {
-          id: recent.key.id,
-        },
-      });
-    }
-    return [];
+    return this.#store.loadMessages(jid, 50)
   }
 
   getState() {
-    return this.#store.state
+    return this.#store.state;
   }
 
   updateStore() {
