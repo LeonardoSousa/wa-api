@@ -1,0 +1,17 @@
+###
+POST http://localhost:3333/messages
+Content-Type: application/json
+
+{
+    "jid": "558781204523@s.whatsapp.net",
+    "message": {
+        "text": "Ola mundo"
+    }
+}
+###
+GET http://localhost:3333/messages
+Content-Type: application/json
+
+###
+GET http://localhost:3333/messages/BAE5F9E89DA6516D
+Content-Type: application/json

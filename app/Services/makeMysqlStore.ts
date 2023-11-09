@@ -1,17 +1,17 @@
+import Database from "@ioc:Adonis/Lucid/Database";
 import {
   BaileysEventEmitter,
   Chat,
   ConnectionState,
   Contact,
-  WAMessageContent,
-  WAMessageCursor,
   proto,
 } from "@whiskeysockets/baileys";
-import { existsSync, readFileSync } from "fs";
-import { knex } from "knex";
 import { chunk, get, has } from "lodash";
+import Logger from "@ioc:Adonis/Core/Logger";
 
-export const makeMysqlStore = (conexao: knex.Knex) => {
+
+export const makeMysqlStore = () => {
+  const connection = Database.knexQuery();
   const state: ConnectionState = { connection: "close" };
 
   const syncChats = async (chats: Chat[]) => {
@@ -25,8 +25,8 @@ export const makeMysqlStore = (conexao: knex.Knex) => {
         description: c.description,
       };
     });
-    await conexao.table("chats").insert(insertChats).onConflict().merge();
-    console.log(`sync ${chats.length}  chats`);
+    await connection.table("chats").insert(insertChats).onConflict().merge();
+    Logger.info(`sync %\d chat(s)`,  chats.length);
   };
 
   const syncMessages = async (messages: proto.IWebMessageInfo[]) => {
@@ -46,16 +46,17 @@ export const makeMysqlStore = (conexao: knex.Knex) => {
         timestamp: parseInt(String(message.messageTimestamp)),
         text: text,
         status: message.status,
+        payload: JSON.stringify(message),
       };
     });
 
-    const chunked = chunk(inserMessages, 1000);
+    const chunked = chunk(inserMessages, 100);
 
     for await (const list of chunked) {
-      await conexao.table("messages").insert(list).onConflict().merge();
+      await connection.table("messages").insert(list).onConflict().merge();
     }
 
-    console.log(`sync ${messages.length} messages`);
+    Logger.info(`sync %d message(s)`, messages.length);
   };
 
   const syncContacts = async (contacts: Contact[]) => {
@@ -70,8 +71,12 @@ export const makeMysqlStore = (conexao: knex.Knex) => {
         status: c.status,
       };
     });
-    await conexao.table("contacts").insert(insertContacts).onConflict().merge();
-    console.log(`sync ${contacts.length} contacts`);
+    await connection
+      .table("contacts")
+      .insert(insertContacts)
+      .onConflict()
+      .merge();
+    Logger.info(`sync %s contact(s)`, contacts.length);
   };
 
   const bind = (ev: BaileysEventEmitter) => {
@@ -80,6 +85,7 @@ export const makeMysqlStore = (conexao: knex.Knex) => {
     });
 
     ev.on("messaging-history.set", async (data) => {
+      Logger.info("History receiving")
       await syncMessages(data.messages);
       await syncChats(data.chats);
       await syncContacts(data.contacts);
@@ -108,50 +114,8 @@ export const makeMysqlStore = (conexao: knex.Knex) => {
     });
   };
 
-  const loadMessages = async (
-    jid: string,
-    count: number,
-    cursor?: WAMessageCursor
-  ) => {
-    const mode = !cursor || "before" in cursor ? "before" : "after";
-
-    const query = await conexao
-      .from("messages")
-      .where("remoteJid", jid)
-      .limit(count)
-      .select("*");
-
-    return query
-  };
-
-  const readFromFile = async (path: string) => {
-    const exits = await existsSync(path);
-    if (exits) {
-      const strJson = await readFileSync(path, { encoding: "utf-8" });
-      const json: {
-        chats: Chat[];
-        messages: Record<string, proto.IWebMessageInfo[]>;
-        contacts: Record<string, Contact>;
-      } = JSON.parse(strJson);
-
-      const messages = Object.values(json.messages).reduce<
-        proto.IWebMessageInfo[]
-      >((acc, m) => {
-        return [...acc, ...m];
-      }, []);
-
-      const contacts = Object.values(json.contacts);
-
-      await syncChats(json.chats);
-      await syncMessages(messages);
-      await syncContacts(contacts);
-    }
-  };
-
   return {
     state,
     bind,
-    readFromFile,
-    loadMessages,
   };
 };

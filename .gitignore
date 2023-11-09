@@ -1,6 +1,8 @@
-node_modules/
-storage/
-!storage/.inc
-dist/
-package-lock.json
-yarn.lock
+node_modules
+build
+coverage
+.vscode
+.DS_STORE
+.env
+tmp
+storage
