@@ -13,5 +13,5 @@ GET http://localhost:3333/messages
 Content-Type: application/json
 
 ###
-GET http://localhost:3333/messages/BAE5F9E89DA6516D
-Content-Type: application/json
+GET http://localhost:3333/messages/00214C3847CAB449946B84931D9FAF84
+Accept: image/jpeg

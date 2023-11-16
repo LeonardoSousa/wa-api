@@ -14,7 +14,6 @@
     "@babel/preset-env": "^7.23.3",
     "@japa/preset-adonis": "^1.2.0",
     "@japa/runner": "^2.5.1",
-    "@symfony/webpack-encore": "^4.1.1",
     "@types/lodash": "^4.14.201",
     "@types/proxy-addr": "^2.0.3",
     "@types/qrcode": "^1.5.5",
@@ -44,6 +43,7 @@
     "pino": "^7.0.0",
     "proxy-addr": "^2.0.7",
     "qrcode": "^1.5.3",
+    "qrcode-terminal": "^0.12.0",
     "reflect-metadata": "^0.1.13",
     "source-map-support": "^0.5.21"
   }

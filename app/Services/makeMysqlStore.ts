@@ -23,6 +23,8 @@ export const makeMysqlStore = () => {
         displayName: c.displayName,
         archived: c.archived,
         description: c.description,
+        unreadCount: c.unreadCount,
+        payload: JSON.stringify(c)
       };
     });
     await connection.table("chats").insert(insertChats).onConflict().merge();
@@ -107,7 +109,7 @@ export const makeMysqlStore = () => {
       await syncChats(chats as Chat[]);
     });
 
-    ev.on("messages.upsert", async (data) => {
+    ev.on("messages.upsert", async (data) => {      
       if (data.type == "append" || data.type == "notify") {
         await syncMessages(data.messages);
       }

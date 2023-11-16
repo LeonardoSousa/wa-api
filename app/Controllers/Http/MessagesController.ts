@@ -23,8 +23,10 @@ export default class MessagesController {
             .from('messages')
             .where('id', ctx.params.id)
             .first()
-        // return msg;
-        return msg.payload
+
+        const p = JSON.parse(msg.payload);
+        return await WhatsappService.sock.updateMediaMessage(p)
+        
     }
 
 }
