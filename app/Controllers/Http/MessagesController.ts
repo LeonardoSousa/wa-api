@@ -1,32 +1,49 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Database from '@ioc:Adonis/Lucid/Database';
-import WhatsappService from 'App/Services/WhatsappService'
-import { omit } from 'lodash';
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Database from "@ioc:Adonis/Lucid/Database";
+import { downloadMediaMessage } from "@whiskeysockets/baileys";
+import WhatsappService from "App/Services/WhatsappService";
+import { get, has, omit } from "lodash";
+import { readFileSync } from 'node:fs'
 
 export default class MessagesController {
+  async index() {
+    return (
+      await Database.query().from("messages").whereNotNull("payload").limit(50)
+    ).map((m) => omit(JSON.parse(m.payload), "payload"));
+  }
 
-    async index() {
-        return (await Database.query()
-        .from('messages')
-        .whereNotNull('payload')
-        .limit(50)).map(m => omit(JSON.parse(m.payload), 'payload'));
+  async store(ctx: HttpContextContract) {
+    const { jid, message } = ctx.request.body();
+
+    const mediaKey = Object.keys(message).find(k => ['video', 'image', 'audio', 'sticker', 'document'].includes(k));
+
+    if(mediaKey) {
+      
+      const base64:string = get(message, mediaKey, '')
+
+      const data = base64.split("base64,")[1]
+
+      message[mediaKey] = Buffer.from(data, 'base64')
     }
 
-    async store(ctx: HttpContextContract) {
-        const {jid, message} = ctx.request.body()
 
-        return WhatsappService.sock.sendMessage(jid, message);
+    return WhatsappService.sock.sendMessage(jid, message);
+  }
+
+  async show(ctx: HttpContextContract) {
+    const msg = await Database.query()
+      .from("messages")
+      .where("id", ctx.params.id)
+      .first();
+
+    try {
+      const m = JSON.parse(msg.payload);
+      const buff = await downloadMediaMessage(m, "buffer", {});
+            
+
+      return ctx.response.header("content-type", msg.mime).send(buff);
+    } catch (error) {
+        return ctx.response.json({error: "Não é uma messagem media"})
     }
-
-    async show(ctx: HttpContextContract) {
-        const msg = await Database.query()
-            .from('messages')
-            .where('id', ctx.params.id)
-            .first()
-
-        const p = JSON.parse(msg.payload);
-        return await WhatsappService.sock.updateMediaMessage(p)
-        
-    }
-
+  }
 }

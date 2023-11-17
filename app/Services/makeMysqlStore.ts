@@ -4,6 +4,7 @@ import {
   Chat,
   ConnectionState,
   Contact,
+  getContentType,
   proto,
 } from "@whiskeysockets/baileys";
 import { chunk, get, has } from "lodash";
@@ -41,6 +42,10 @@ export const makeMysqlStore = () => {
         text = get(message, "message.extendedTextMessage.text", "");
       }
 
+     const contentType = getContentType(message.message!) ?? ""
+     const mime = get(message, `message.${contentType}.mimetype`, '')
+
+
       return {
         remoteJid: message.key.remoteJid,
         id: message.key.id,
@@ -48,6 +53,8 @@ export const makeMysqlStore = () => {
         timestamp: parseInt(String(message.messageTimestamp)),
         text: text,
         status: message.status,
+        contentType: contentType.replace('Message', ''),
+        mime: mime,
         payload: JSON.stringify(message),
       };
     });
@@ -71,6 +78,7 @@ export const makeMysqlStore = () => {
         verifiedName: c.verifiedName,
         imgUrl: c.imgUrl,
         status: c.status,
+        payload: JSON.stringify(c)
       };
     });
     await connection

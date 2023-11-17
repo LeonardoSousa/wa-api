@@ -9,7 +9,6 @@ import { pino } from "pino";
 import { makeMysqlStore } from "./makeMysqlStore";
 import Logger from "@ioc:Adonis/Core/Logger";
 import Env from "@ioc:Adonis/Core/Env";
-import { useMysqlAuthState } from "./useMysqlAuthState";
 
 class WhatsappService {
   sock: WASocket;
@@ -33,20 +32,22 @@ class WhatsappService {
     // const { state, saveCreds } = await useMysqlAuthState(this.prefix);
     logger.level = "fatal";
     this.sock = makeWASocket({
-      version: [2, 2321, 88],
+      // version: [2, 2321, 88],
       auth: state,
       printQRInTerminal: true,
       logger,
-      browser: Browsers.macOS("Desktop"),
-        syncFullHistory: true,
+      browser: Browsers.ubuntu("Desktop"),
+      syncFullHistory: true,
     });
+
+    
 
     this.sock.ev.on("connection.update", async (state) => {
       if (state.lastDisconnect?.error?.message.startsWith("Stream Errored")) {
         Logger.error("Erro ao connectar");
-        await this.connect();
+        // await this.connect();
       }
-      
+
       if (state.connection) {
         this.state = state.connection;
         Logger.info(state.connection);

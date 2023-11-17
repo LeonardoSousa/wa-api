@@ -2,11 +2,23 @@
   "commands": {
     "teste": {
       "settings": {
-        "loadApp": false,
-        "stayAlive": false
+        "loadApp": true,
+        "stayAlive": true
       },
       "commandPath": "./commands/Teste",
       "commandName": "teste",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
+    "wa:auth": {
+      "settings": {
+        "loadApp": false,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/WaAuth",
+      "commandName": "wa:auth",
       "description": "",
       "args": [],
       "aliases": [],
