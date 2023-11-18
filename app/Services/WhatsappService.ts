@@ -39,9 +39,8 @@ class WhatsappService {
       browser: Browsers.ubuntu("Desktop"),
       syncFullHistory: true,
     });
-
     
-
+    
     this.sock.ev.on("connection.update", async (state) => {
       if (state.lastDisconnect?.error?.message.startsWith("Stream Errored")) {
         Logger.error("Erro ao connectar");

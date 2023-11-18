@@ -35,6 +35,15 @@ export default class MessagesController {
       .from("messages")
       .where("id", ctx.params.id)
       .first();
+    
+    return JSON.parse(msg.payload);
+  }
+
+  async download(ctx: HttpContextContract) {
+    const msg = await Database.query()
+      .from("messages")
+      .where("id", ctx.params.id)
+      .first();
 
     try {
       const m = JSON.parse(msg.payload);
@@ -43,7 +52,12 @@ export default class MessagesController {
 
       return ctx.response.header("content-type", msg.mime).send(buff);
     } catch (error) {
-        return ctx.response.json({error: "Não é uma messagem media"})
+        let messageError = "Não é uma messagem media"
+        if(has(error, 'message')) {
+          messageError = get(error, 'message')
+        }
+        // console.log(Object.keys(error))
+        return ctx.response.json({error: messageError,})
     }
   }
 }

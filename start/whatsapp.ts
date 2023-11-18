@@ -1,3 +1,9 @@
+import { WaWebhooks } from "App/Services/WaWebhooks";
 import WhatsappService from "App/Services/WhatsappService";
 
-WhatsappService.connect();
+(async () => {
+
+    await WhatsappService.connect();
+    const webhooks = new WaWebhooks(WhatsappService.sock.ev)
+    webhooks.start()
+})()

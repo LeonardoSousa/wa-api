@@ -39,3 +39,8 @@ Content-Type: application/json
 ###
 GET http://localhost:3331/messages/026260BDEC4C891AD7DE11145A489970
 Accept: image/jpeg
+
+
+###
+GET http://localhost:3331/messages/026260BDEC4C891AD7DE11145A489970
+Accept: image/jpeg
