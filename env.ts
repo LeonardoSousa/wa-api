@@ -21,5 +21,6 @@ export default Env.rules({
 	APP_NAME: Env.schema.string(),
   	DRIVE_DISK: Env.schema.enum(['local'] as const),
 	NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
-	WA_KEY: Env.schema.string()
+	WA_KEY: Env.schema.string(),
+	STORE_PATH: Env.schema.string()
 })

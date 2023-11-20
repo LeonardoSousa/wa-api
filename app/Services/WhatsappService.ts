@@ -68,7 +68,8 @@ class WhatsappService {
   }
 
   getAuthFileName(): string {
-    return `storage/auth-info-${this.prefix}`;
+    const path = Env.get("STORE_PATH")
+    return `${path}/auth-info-${this.prefix}`;
   }
 }
 

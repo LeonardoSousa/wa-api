@@ -1,5 +1,4 @@
 
-import qrcode from 'qrcode'
 import Route from '@ioc:Adonis/Core/Route'
 import WhatsappService from 'App/Services/WhatsappService'
 

@@ -1,5 +1,4 @@
 import { BaseCommand } from "@adonisjs/core/build/standalone";
-import { useMysqlAuthState } from "../app/Services/useMysqlAuthState";
 
 export default class Teste extends BaseCommand {
   /**
@@ -29,15 +28,17 @@ export default class Teste extends BaseCommand {
   };
 
   public async run() {
-    this.logger.info("Hello world!");
-    const { state } = await useMysqlAuthState("deltex2");
+    const Database = this.application.container.use("Adonis/Lucid/Database");
+    const Logger = this.application.container.use("Adonis/Core/Logger");
+    
+    console.time("t")
 
-    await state.keys.set({
-      "sender-key-memory": {
-        teste: {
-          "": true,
-        },
-      },
-    });
+    const c = await Database.from('messages')
+      .select('id', 'remoteJid', 'mime')
+      .orderBy('timestamp', 'desc').limit(100)
+
+    console.timeEnd("t")
+
+    Logger.info("%o", c);
   }
 }

@@ -3,7 +3,6 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import { downloadMediaMessage } from "@whiskeysockets/baileys";
 import WhatsappService from "App/Services/WhatsappService";
 import { get, has, omit } from "lodash";
-import { readFileSync } from 'node:fs'
 
 export default class MessagesController {
   async index() {
