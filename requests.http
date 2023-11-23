@@ -41,7 +41,7 @@ POST http://localhost:3333/messages/is-registred
 Content-Type: application/json
 
 {
-    "number": "99443322"
+    "number": "0000"
 }
 
 ###

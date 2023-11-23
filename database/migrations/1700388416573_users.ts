@@ -1,5 +1,4 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
-import { defaultTo } from 'lodash'
 
 export default class extends BaseSchema {
   protected tableName = 'users'
