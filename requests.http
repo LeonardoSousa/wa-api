@@ -37,7 +37,15 @@ GET http://localhost:3333/messages
 Content-Type: application/json
 
 ###
-GET http://localhost:3331/messages/026260BDEC4C891AD7DE11145A489970
+POST http://localhost:3333/messages/is-registred
+Content-Type: application/json
+
+{
+    "number": "0000"
+}
+
+###
+GET http://localhost:3333/messages/026260BDEC4C891AD7DE11145A489970
 Accept: image/jpeg
 
 

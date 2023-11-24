@@ -8,5 +8,6 @@ Route.get('/', async () => {
 })
 
 
+Route.post("messages/is-registred", 'MessagesController.isRegistred')
 Route.get("messages/:id/download", 'MessagesController.download')
 Route.resource('messages', 'MessagesController')
