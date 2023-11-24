@@ -5,6 +5,7 @@ import {
   Browsers,
   WAConnectionState,
 } from "@whiskeysockets/baileys";
+
 import { pino } from "pino";
 import { makeMysqlStore } from "./makeMysqlStore";
 import Logger from "@ioc:Adonis/Core/Logger";
